@@ -1,0 +1,22 @@
+services:
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      # Belt-and-suspenders: prefer IPv4 DNS (see backend/src/config/data-source.ts).
+      NODE_OPTIONS: --dns-result-order=ipv4first
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in the project-root .env to your Neon connection string - see README}
+      SEED_DB: ${SEED_DB:-true}
+    ports:
+      - "${BACKEND_PORT:-4000}:4000"
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-5173}:80"
